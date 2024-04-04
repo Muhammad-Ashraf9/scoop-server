@@ -6,6 +6,7 @@ const helmet = require("helmet");
 require("dotenv").config();
 
 const authRouter = require("./routes/authenticationRoutes");
+const productRouter = require("./routes/productRoutes");
 
 const swaggerDocs = require("./utils/swagger");
 
@@ -40,6 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 
 //Auth Routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/products", productRouter);
 
 app.use(express.static("images"));
 
