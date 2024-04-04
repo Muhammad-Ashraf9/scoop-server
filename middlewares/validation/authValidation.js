@@ -1,8 +1,4 @@
 const { body, param, check } = require("express-validator");
-const bcrypt = require("bcrypt");
-require("dotenv").config();
-
-const User = require("../../models/User");
 
 exports.signinValidation = () => [
   body("email").trim().isEmail().withMessage("Invalid email"),

@@ -1,24 +1,24 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const User = require("../models/User");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
     const authHeader = req.get("authorization");
     if (!authHeader) {
       throw new Error("Not authenticated");
     }
     const token = authHeader.split(" ")[1];
-
-    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     console.log(decodedToken);
-    req.user = decodedToken;
+    const { userId } = decodedToken;
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    req.user = user;
     next();
   } catch (err) {
-    let error = new Error("Not authenticated");
-    if (err.name === "TokenExpiredError") {
-      error = new Error("Token expired");
-    }
-    error.statusCode = 403;
-    next(error);
+    err.statusCode = 403;
+    next(err);
   }
 };
