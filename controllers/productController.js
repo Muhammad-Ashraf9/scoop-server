@@ -15,10 +15,6 @@ exports.addProduct = async (req, res, next) => {
 exports.getProducts = async (req, res, next) => {
   try {
     const { category, subcategory, page = 1, pageSize = 10 } = req.query;
-    console.log("category :>> ", category);
-    console.log("subcategory :>> ", subcategory);
-    console.log("page :>> ", page);
-    console.log("pageSize :>> ", pageSize);
     const query = {};
 
     if (category && !(await Category.findById(category))) {
@@ -40,7 +36,7 @@ exports.getProducts = async (req, res, next) => {
       Product.find(query)
         .limit(Number(pageSize))
         .skip((Number(page) - 1) * Number(pageSize)),
-      Product.countDocuments(),
+      Product.countDocuments(query),
     ]);
 
     res.status(200).json({ products, totalCount });
