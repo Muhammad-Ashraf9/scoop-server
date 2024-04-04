@@ -1,4 +1,6 @@
 const Product = require("../models/Product");
+const Category = require("../models/Category");
+const Subcategory = require("../models/SubCategory");
 
 exports.addProduct = async (req, res, next) => {
   try {
@@ -12,9 +14,36 @@ exports.addProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const { category, subcategory, page = 1, pageSize = 10 } = req.query;
+    console.log("category :>> ", category);
+    console.log("subcategory :>> ", subcategory);
+    console.log("page :>> ", page);
+    console.log("pageSize :>> ", pageSize);
+    const query = {};
 
-    res.status(200).json({ products });
+    if (category && !(await Category.findById(category))) {
+      const error = new Error("Category not found");
+      error.statusCode = 404;
+      throw error;
+    } else if (category) {
+      query.category = category;
+    }
+    if (subcategory && !(await Subcategory.findById(subcategory))) {
+      const error = new Error("Subcategory not found");
+      error.statusCode = 404;
+      throw error;
+    } else if (subcategory) {
+      query.subcategory = subcategory;
+    }
+
+    const [products, totalCount] = await Promise.all([
+      Product.find(query)
+        .limit(Number(pageSize))
+        .skip((Number(page) - 1) * Number(pageSize)),
+      Product.countDocuments(),
+    ]);
+
+    res.status(200).json({ products, totalCount });
   } catch (error) {
     next(error);
   }

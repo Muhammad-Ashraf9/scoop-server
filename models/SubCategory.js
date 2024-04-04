@@ -5,4 +5,4 @@ const subcategorySchema = new mongoose.Schema({
     description: { type: String },
     });
 
-exports.SubCategory = mongoose.model("SubCategory", subcategorySchema);
+module.exports = mongoose.model("SubCategory", subcategorySchema);
