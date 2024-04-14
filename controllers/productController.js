@@ -4,6 +4,20 @@ const Subcategory = require("../models/SubCategory");
 
 exports.addProduct = async (req, res, next) => {
   try {
+    const { category, subcategory } = req.body;
+
+    const foundCategory = await Category.findById(category);
+    if (!foundCategory) {
+      const error = new Error("Category not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    if (subcategory && !foundCategory.subcategories.includes(subcategory)) {
+      const error = new Error("Subcategory not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
     const product = await Product.create(req.body);
 
     res.status(201).json({ message: "Product created successfully", product });
@@ -14,29 +28,40 @@ exports.addProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const { category, subcategory, page = 1, pageSize = 10 } = req.query;
-    const query = {};
+    const {
+      category,
+      subcategory,
+      page = 1,
+      pageSize = 10,
+      sort = "createdAt",
+      order = "desc",
+    } = req.query;
+    const filter = {};
 
     if (category && !(await Category.findById(category))) {
       const error = new Error("Category not found");
       error.statusCode = 404;
       throw error;
     } else if (category) {
-      query.category = category;
+      filter.category = category;
     }
     if (subcategory && !(await Subcategory.findById(subcategory))) {
       const error = new Error("Subcategory not found");
       error.statusCode = 404;
       throw error;
     } else if (subcategory) {
-      query.subcategory = subcategory;
+      filter.subcategory = subcategory;
     }
 
+
     const [products, totalCount] = await Promise.all([
-      Product.find(query)
+      Product.find(filter)
+        .sort({ [sort]: order })
         .limit(Number(pageSize))
-        .skip((Number(page) - 1) * Number(pageSize)),
-      Product.countDocuments(query),
+        .skip((Number(page) - 1) * Number(pageSize))
+        .populate("category")
+        .populate("subcategory"),
+      Product.countDocuments(filter),
     ]);
 
     res.status(200).json({ products, totalCount });

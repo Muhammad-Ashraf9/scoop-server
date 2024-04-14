@@ -7,6 +7,7 @@ require("dotenv").config();
 
 const authRouter = require("./routes/authenticationRoutes");
 const productRouter = require("./routes/productRoutes");
+const categoryRouter = require("./routes/categoryRoutes");
 
 const swaggerDocs = require("./utils/swagger");
 
@@ -42,12 +43,13 @@ app.use(express.urlencoded({ extended: true }));
 //Auth Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/products", productRouter);
+app.use("/api/v1/categories", categoryRouter);
 
 app.use(express.static("images"));
 
 /////////////// Not found
 app.use((req, res, next) => {
-  res.status(404).json({ message: "Not Found" });
+  res.status(404).json({ message: "Resource Not Found" });
 });
 
 //////////////// Error handler

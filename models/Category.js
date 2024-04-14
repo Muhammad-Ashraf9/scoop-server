@@ -7,7 +7,6 @@ const categorySchema = new mongoose.Schema(
     subcategories: [
       { type: mongoose.Schema.Types.ObjectId, ref: "SubCategory" },
     ],
-    image: { type: String },
   },
   { timestamps: true }
 );
